@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+import string
+import re
+import web
+from urllib import request
+import codecs
+from Conn_MySQL import conn
+
+urls = (
+    '/api/index','api_index',       #    主页API接口
+    '/api/(.*)','error',            #    错误
+    '/(.*)', 'hello'
+)
+app = web.application(urls, globals())
+
+#   主页API接口
+class api_index:
+    def GET(self):
+        data = web.input()
+        if str(data.get("user")) == "None":
+            sql="select `userid`,`username`,`userpassword`,`userpri`,`userlike`,`userinnday`,`userlinks`,`userfav` from innovate_user"
+        else:
+            sql = "select `userid`,`username`,`userpassword`,`userpri`,`userlike`,`userinnday`,`userlinks`,`userfav` from innovate_user"
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        rs = cursor.fetchall()
+        count=1
+        result='{"'
+        for i in rs:
+            result+=str(count)+'":{"id":"%s",\n"name":"%s",\n"password":"%s",\n"pri":"http://localshost:8080%s",\n"link":%s,\n"innday":"%s",\n"links":%s,\n"fav":%s},\n"'%(i)
+            count+=1
+        # result+=result[-1]+"}"
+        return result[0:-3]+"}"
+
+
+#   错误
+class error:
+    def GET(self,name):
+        if name:
+            return name+"不存在"
+        return "error"
+
+class hello:
+    def GET(self,name):
+        if name:
+            return name
+        cursor=conn.cursor()
+        print(cursor)
+
+if __name__ == "__main__":
+    app.run()
