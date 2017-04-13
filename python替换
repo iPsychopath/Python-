@@ -1,0 +1,2 @@
+print(rs[0][1])
+    print(rs[0][1].replace('$-$','"'))
